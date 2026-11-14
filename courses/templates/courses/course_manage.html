@@ -1,0 +1,78 @@
+{% extends '_base.html' %}
+
+{% block page_title %}مدیریت دوره‌ها{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-kanban me-2 text-primary"></i>
+            {% if is_admin %}مدیریت همه‌ی دوره‌ها{% else %}دوره‌هایی که تدریس می‌کنم{% endif %}
+        </h4>
+        <a href="{% url 'courses:course_create' %}" class="btn btn-gradient btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>ایجاد دوره جدید
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle bg-white rounded-3 overflow-hidden shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>دوره</th>
+                    {% if is_admin %}<th>مدرس</th>{% endif %}
+                    <th>وضعیت</th>
+                    <th>دانشجو / ظرفیت</th>
+                    <th>درس‌ها</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                    <tr>
+                        <td><a href="{% url 'courses:course_detail' course.slug %}">{{ course.title }}</a></td>
+                        {% if is_admin %}<td>{{ course.instructor }}</td>{% endif %}
+                        <td>
+                            {% if course.is_active %}
+                                <span class="badge bg-success-subtle text-success-emphasis rounded-pill">فعال</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">غیرفعال</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ course.student_count }} / {{ course.capacity }}</td>
+                        <td>{{ course.lesson_count }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <a href="{% url 'courses:course_update' course.slug %}" class="btn btn-sm btn-outline-primary" title="ویرایش">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'courses:lesson_create' course.slug %}" class="btn btn-sm btn-outline-success" title="افزودن درس">
+                                    <i class="bi bi-plus-circle"></i>
+                                </a>
+                                <a href="{% url 'courses:course_students' course.slug %}" class="btn btn-sm btn-outline-secondary" title="دانشجوها">
+                                    <i class="bi bi-people"></i>
+                                </a>
+                                <form method="post" action="{% url 'courses:course_toggle_active' course.slug %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="manage">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning"
+                                            title="{% if course.is_active %}غیرفعال کردن{% else %}فعال کردن{% endif %}">
+                                        <i class="bi {% if course.is_active %}bi-pause-circle{% else %}bi-play-circle{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <a href="{% url 'courses:course_delete' course.slug %}" class="btn btn-sm btn-outline-danger" title="حذف">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">هنوز دوره‌ای ثبت نشده است.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

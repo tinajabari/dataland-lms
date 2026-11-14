@@ -1,0 +1,221 @@
+{% extends '_base.html' %}
+
+{% block page_title %}{{ course.title }}{% endblock page_title %}
+
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+
+            <!-- اطلاعات دوره -->
+            <div class="card my-3 overflow-hidden">
+                {% if course.cover_image %}
+                    <img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
+                         class="w-100" style="max-height: 340px; object-fit: cover;">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center"
+                         style="height: 220px; background: var(--dl-gradient); color: #fff;">
+                        <i class="bi bi-mortarboard-fill" style="font-size: 3.5rem; opacity: .85;"></i>
+                    </div>
+                {% endif %}
+                <div class="p-4 p-md-5">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">
+                            {{ course.get_level_display }}
+                        </span>
+                        {% if course.category %}
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">
+                                {{ course.category }}
+                            </span>
+                        {% endif %}
+                        {% if not course.is_active %}
+                            <span class="badge bg-secondary rounded-pill">غیرفعال</span>
+                        {% endif %}
+                    </div>
+                    <h1 class="fw-bold">{{ course.title }}</h1>
+                    <p class="text-muted mb-4">
+                        <i class="bi bi-person-badge me-1"></i>مدرس:
+                        <a href="{% url 'courses:instructor_detail' course.instructor.pk %}">{{ course.instructor }}</a>
+                    </p>
+                    <p class="fs-5" style="line-height: 1.9;">{{ course.description|linebreaksbr }}</p>
+
+                    <div class="row text-center mt-4 g-3">
+                        <div class="col-4">
+                            <div class="border rounded-3 p-3">
+                                <i class="bi bi-people fs-4 text-primary"></i>
+                                <p class="mb-0 mt-1 small text-muted">ظرفیت باقی‌مانده</p>
+                                <strong>{{ course.remaining_capacity }} نفر</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-3 p-3">
+                                <i class="bi bi-cash-coin fs-4 text-primary"></i>
+                                <p class="mb-0 mt-1 small text-muted">شهریه</p>
+                                <strong>{% if course.price > 0 %}{{ course.price }} تومان{% else %}رایگان{% endif %}</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-3 p-3">
+                                <i class="bi bi-calendar-event fs-4 text-primary"></i>
+                                <p class="mb-0 mt-1 small text-muted">شروع دوره</p>
+                                <strong>{{ course.start_date|default:"به‌زودی" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بخش عملیات: بسته به نقش کاربر -->
+                    <div class="mt-4">
+                        {% if can_manage %}
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'courses:course_update' course.slug %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-pencil-square me-1"></i>ویرایش دوره
+                                </a>
+                                <a href="{% url 'courses:lesson_create' course.slug %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>افزودن درس
+                                </a>
+                                <a href="{% url 'courses:course_students' course.slug %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-people me-1"></i>دانشجوها ({{ course.enrolled_count }})
+                                </a>
+                                <form method="post" action="{% url 'courses:course_toggle_active' course.slug %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        {% if course.is_active %}<i class="bi bi-pause-circle me-1"></i>غیرفعال کردن
+                                        {% else %}<i class="bi bi-play-circle me-1"></i>فعال کردن{% endif %}
+                                    </button>
+                                </form>
+                                <a href="{% url 'courses:course_delete' course.slug %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i>حذف
+                                </a>
+                            </div>
+                        {% elif is_student %}
+                            {% if has_current_enrollment %}
+                                <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2 mb-0">
+                                    <span>
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        شما در این دوره ثبت‌نام کرده‌اید ({{ enrollment.get_status_display }}).
+                                    </span>
+                                    {% if enrollment.can_cancel %}
+                                        <form method="post" action="{% url 'courses:enrollment_cancel' enrollment.pk %}"
+                                              onsubmit="return confirm('ثبت‌نام این دوره لغو شود؟');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="detail">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x-circle me-1"></i>لغو ثبت‌نام
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <small class="text-muted">لغو ثبت‌نام بعد از شروع دوره ممکن نیست.</small>
+                                    {% endif %}
+                                </div>
+                            {% elif enrollment and enrollment.status == 'rejected' %}
+                                <div class="alert alert-danger mb-0">
+                                    <i class="bi bi-x-circle me-1"></i>ثبت‌نام شما در این دوره رد شده است.
+                                </div>
+                            {% elif can_enroll %}
+                                <form method="post" action="{% url 'courses:enroll_course' course.slug %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-gradient btn-lg">
+                                        <i class="bi bi-pencil-square me-1"></i>ثبت‌نام در این دوره
+                                    </button>
+                                </form>
+                            {% elif course.is_full %}
+                                <div class="alert alert-danger mb-0">
+                                    <i class="bi bi-x-circle me-1"></i>ظرفیت این دوره تکمیل شده است.
+                                </div>
+                            {% endif %}
+                        {% elif not user.is_authenticated %}
+                            <div class="alert alert-info mb-0">
+                                برای ثبت‌نام در این دوره ابتدا
+                                <a href="{% url 'login' %}?next={{ request.path|urlencode }}">وارد شوید</a>
+                                یا
+                                <a href="{% url 'accounts:signup' %}">ثبت‌نام کنید</a>.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- سرفصل درس‌ها -->
+            <div class="card my-3 p-4 p-md-5">
+                <h4 class="fw-bold mb-3"><i class="bi bi-collection-play me-2 text-primary"></i>سرفصل‌ها و درس‌ها</h4>
+                {% if lessons %}
+                    <div class="list-group list-group-flush">
+                        {% for lesson in lessons %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center gap-2 px-0">
+                                <div class="d-flex align-items-start gap-3">
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis mt-1">{{ lesson.order }}</span>
+                                    <div>
+                                        {% if has_lesson_access %}
+                                            <a href="{% url 'courses:lesson_detail' lesson.pk %}" class="fw-semibold text-decoration-none">
+                                                {{ lesson.title }}
+                                            </a>
+                                        {% else %}
+                                            <span class="fw-semibold"><i class="bi bi-lock-fill text-muted me-1"></i>{{ lesson.title }}</span>
+                                        {% endif %}
+                                        {% if lesson.description %}
+                                            <div class="text-muted small">{{ lesson.description|truncatewords:18 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if can_manage %}
+                                    <div class="d-flex gap-1">
+                                        <a href="{% url 'courses:lesson_update' lesson.pk %}" class="btn btn-sm btn-outline-primary" title="ویرایش">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'courses:lesson_delete' lesson.pk %}" class="btn btn-sm btn-outline-danger" title="حذف">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if not has_lesson_access %}
+                        <p class="text-muted small mt-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>محتوای درس‌ها فقط برای دانشجوهای ثبت‌نام‌شده در دوره قابل مشاهده است.
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted mb-0">هنوز درسی برای این دوره ثبت نشده است.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ستون کناری: درباره مدرس -->
+        <div class="col-lg-4">
+            <div class="card my-3">
+                <h5 class="card-header bg-white border-0 pt-4 fw-bold">
+                    <i class="bi bi-person-badge me-1"></i>درباره مدرس
+                </h5>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        {% if course.instructor.photo %}
+                            <img src="{{ course.instructor.photo.url }}" alt="{{ course.instructor }}"
+                                 class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 60px; height: 60px; background: var(--dl-gradient); color: #fff;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ course.instructor }}</strong>
+                            {% if course.instructor.specialty %}
+                                <div class="text-muted small">{{ course.instructor.specialty }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="card-text text-secondary">
+                        {{ course.instructor.bio|default:"توضیحاتی ثبت نشده است."|truncatewords:40 }}
+                    </p>
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>بازگشت به لیست دوره‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

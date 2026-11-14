@@ -1,0 +1,8 @@
+{
+  "platform": "django",
+  "app": "dataland",
+  "port": 8000,
+  "django": {
+    "collectStatic": true
+  }
+}

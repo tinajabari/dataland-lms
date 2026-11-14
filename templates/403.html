@@ -1,0 +1,24 @@
+{% extends '_base.html' %}
+
+{% block page_title %}دسترسی ندارید{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card p-4 p-md-5 text-center">
+                <i class="bi bi-shield-lock-fill text-danger display-3 mb-3"></i>
+                <h3 class="fw-bold">۴۰۳ — دسترسی ندارید</h3>
+                <p class="text-muted">نقش کاربری شما اجازه‌ی دیدن این صفحه یا انجام این کار را نمی‌دهد.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'home' %}" class="btn btn-primary">بازگشت به صفحه اصلی</a>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary">ورود</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

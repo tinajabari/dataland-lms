@@ -1,0 +1,54 @@
+{% extends '_base.html' %}
+
+{% block page_title %}اساتید{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <h4 class="fw-bold mb-4"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>اساتید موسسه</h4>
+
+    <div class="row g-4">
+        {% for instructor in instructors %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-hover h-100 text-center overflow-hidden position-relative">
+                    <div class="card-body p-4 d-flex flex-column align-items-center" style="min-width: 0;">
+                        {% if instructor.photo %}
+                            <img src="{{ instructor.photo.url }}" alt="{{ instructor }}"
+                                 class="rounded-circle mb-3"
+                                 style="width: 110px; height: 110px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 6px 18px rgba(99,102,241,.25); flex-shrink: 0;">
+                        {% else %}
+                            <div class="rounded-circle mb-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width: 110px; height: 110px; background: var(--dl-gradient); color: #fff; font-size: 2rem;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        {% endif %}
+                        <h6 class="fw-bold mb-1" style="word-break: break-word;">
+                            <a href="{% url 'courses:instructor_detail' instructor.pk %}" class="stretched-link text-dark text-decoration-none">
+                                {{ instructor }}
+                            </a>
+                        </h6>
+                        {% if instructor.specialty %}
+                            <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill mb-2 text-truncate d-block w-100" style="min-width: 0; max-width: 100%;">
+                                {{ instructor.specialty }}
+                            </span>
+                        {% endif %}
+                        <p class="text-muted small flex-grow-1" style="word-break: break-word;">
+                            {{ instructor.bio|default:"بیوگرافی ثبت نشده است."|truncatewords:25 }}
+                        </p>
+                        <span class="text-muted small">
+                            <i class="bi bi-journal-text me-1"></i>{{ instructor.courses.count }} دوره
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light border text-center py-5">
+                    <i class="bi bi-inbox display-6 d-block mb-2 text-muted"></i>
+                    هنوز استادی اضافه نشده است.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

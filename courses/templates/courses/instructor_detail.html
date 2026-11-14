@@ -1,0 +1,66 @@
+{% extends '_base.html' %}
+
+{% block page_title %}{{ instructor }}{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card p-4 text-center">
+                {% if instructor.photo %}
+                    <img src="{{ instructor.photo.url }}" alt="{{ instructor }}"
+                         class="rounded-circle mx-auto mb-3"
+                         style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #fff; box-shadow: 0 8px 22px rgba(99,102,241,.25);">
+                {% else %}
+                    <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                         style="width: 150px; height: 150px; background: var(--dl-gradient); color: #fff; font-size: 3rem;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                {% endif %}
+                <h5 class="fw-bold mb-1">{{ instructor }}</h5>
+                {% if instructor.specialty %}
+                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill mx-auto" style="width: fit-content;">
+                        {{ instructor.specialty }}
+                    </span>
+                {% endif %}
+                {% if instructor.phone %}
+                    <p class="text-muted small mt-3 mb-0">
+                        <i class="bi bi-telephone me-1"></i>{{ instructor.phone }}
+                    </p>
+                {% endif %}
+                <a href="{% url 'courses:instructor_list' %}" class="btn btn-sm btn-outline-secondary mt-3">
+                    <i class="bi bi-arrow-left me-1"></i>بازگشت به لیست اساتید
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card p-4 p-md-5 my-3 my-lg-0">
+                <h5 class="fw-bold mb-3"><i class="bi bi-person-lines-fill me-2 text-primary"></i>درباره {{ instructor }}</h5>
+                <p class="text-secondary" style="line-height: 1.9;">
+                    {{ instructor.bio|default:"بیوگرافی‌ای برای این استاد ثبت نشده است."|linebreaksbr }}
+                </p>
+            </div>
+
+            <div class="card p-4 p-md-5 mt-3">
+                <h5 class="fw-bold mb-3"><i class="bi bi-journal-text me-2 text-primary"></i>دوره‌های {{ instructor }}</h5>
+                <div class="row g-3">
+                    {% for course in courses %}
+                        <div class="col-md-6">
+                            <a href="{% url 'courses:course_detail' course.slug %}" class="text-decoration-none">
+                                <div class="border rounded-3 p-3 h-100">
+                                    <strong class="d-block text-dark mb-1">{{ course.title }}</strong>
+                                    <span class="text-muted small">{{ course.get_level_display }}</span>
+                                </div>
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-muted">هنوز دوره‌ای برای این استاد ثبت نشده است.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

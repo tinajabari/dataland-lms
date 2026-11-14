@@ -1,0 +1,70 @@
+{% extends '_base.html' %}
+
+{% block page_title %}خانه{% endblock page_title %}
+
+{% block content %}
+<div class="container my-5">
+    <h4 class="fw-bold mb-4"><i class="bi bi-stars me-2 text-primary"></i>دوره‌های پیشنهادی</h4>
+    <div class="row g-4">
+        {% for course in featured_courses %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card card-hover h-100">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill mb-2" style="width: fit-content;">
+                            {{ course.get_level_display }}
+                        </span>
+                        <h6 class="fw-bold">{{ course.title }}</h6>
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-person-badge me-1"></i>{{ course.instructor }}
+                        </p>
+                        <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-sm btn-primary mt-auto">
+                            مشاهده دوره
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light border text-center py-5">
+                    <i class="bi bi-inbox display-6 d-block mb-2 text-muted"></i>
+                    هنوز دوره‌ای اضافه نشده — از پنل ادمین چند تا دوره اضافه کن تا اینجا نمایش داده بشن.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if featured_courses %}
+        <div class="text-center mt-4">
+            <a href="{% url 'courses:course_list' %}" class="btn btn-outline-primary">
+                مشاهده همه دوره‌ها <i class="bi bi-arrow-left ms-1"></i>
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="container my-5 cat-strip">
+    <h4 class="fw-bold mb-4"><i class="bi bi-grid-3x3-gap me-2 text-primary"></i>مسیرهای یادگیری</h4>
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a href="{% url 'courses:course_list' %}" class="cat-card grad-1">
+                <i class="bi bi-code-slash d-block mb-2"></i>برنامه‌نویسی
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'courses:course_list' %}" class="cat-card grad-2">
+                <i class="bi bi-bar-chart-line d-block mb-2"></i>علم داده
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'courses:course_list' %}" class="cat-card grad-3">
+                <i class="bi bi-hdd-network d-block mb-2"></i>شبکه
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'courses:course_list' %}" class="cat-card grad-4">
+                <i class="bi bi-shield-lock d-block mb-2"></i>امنیت سایبری
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends '_base.html' %}
+
+{% block page_title %}مدیریت کاربران{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <h4 class="fw-bold mb-4"><i class="bi bi-people me-2 text-primary"></i>مدیریت کاربران</h4>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-6">
+            <input type="text" name="q" value="{{ q }}" class="form-control"
+                   placeholder="جستجو بر اساس نام کاربری، نام یا ایمیل">
+        </div>
+        <div class="col-md-3">
+            <select name="role" class="form-select">
+                <option value="">همه نقش‌ها</option>
+                <option value="admin" {% if selected_role == 'admin' %}selected{% endif %}>مدیر</option>
+                <option value="instructor" {% if selected_role == 'instructor' %}selected{% endif %}>مدرس</option>
+                <option value="student" {% if selected_role == 'student' %}selected{% endif %}>دانشجو</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-grid">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>جستجو</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table align-middle bg-white rounded-3 overflow-hidden shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>نام کاربری</th>
+                    <th>نام</th>
+                    <th>ایمیل</th>
+                    <th>نقش</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ عضویت</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in page %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.get_full_name|default:"—" }}</td>
+                        <td>{{ u.email|default:"—" }}</td>
+                        <td>
+                            {% if u.display_role == 'admin' %}<span class="badge bg-danger-subtle text-danger-emphasis rounded-pill">مدیر</span>
+                            {% elif u.display_role == 'instructor' %}<span class="badge bg-success-subtle text-success-emphasis rounded-pill">مدرس</span>
+                            {% else %}<span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">دانشجو</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if u.is_active %}<span class="badge bg-success-subtle text-success-emphasis rounded-pill">فعال</span>
+                            {% else %}<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">غیرفعال</span>{% endif %}
+                        </td>
+                        <td>{{ u.date_joined|date:"Y/m/d" }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'accounts:user_update' u.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil-square"></i> ویرایش
+                                </a>
+                                {% if u.pk != user.pk %}
+                                    <form method="post" action="{% url 'accounts:user_toggle_active' u.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                            {% if u.is_active %}غیرفعال{% else %}فعال{% endif %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">کاربری پیدا نشد.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page.has_other_pages %}
+        <nav class="mt-3">
+            <ul class="pagination justify-content-center">
+                {% if page.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}&q={{ q }}&role={{ selected_role }}">قبلی</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">صفحه {{ page.number }} از {{ page.paginator.num_pages }}</span></li>
+                {% if page.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}&q={{ q }}&role={{ selected_role }}">بعدی</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock content %}

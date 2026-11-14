@@ -1,0 +1,30 @@
+{% extends '_base.html' %}
+
+{% block page_title %}حذف دوره{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card p-4 p-md-5 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-5 mb-3"></i>
+                <h3 class="fw-bold">حذف دوره</h3>
+                <p class="text-muted">
+                    آیا از حذف دوره <strong>«{{ course.title }}»</strong> مطمئن هستید؟<br>
+                    با حذف دوره، <strong>{{ lesson_count }}</strong> درس و <strong>{{ enrollment_count }}</strong>
+                    ثبت‌نام آن هم برای همیشه پاک می‌شود.
+                </p>
+                <p class="small text-muted">
+                    اگر فقط می‌خواهید دوره به دانشجوها نمایش داده نشود، به‌جای حذف آن را «غیرفعال» کنید.
+                </p>
+                <form method="post" class="d-flex justify-content-center gap-2 mt-3">
+                    {% csrf_token %}
+                    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-secondary">انصراف</a>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>بله، حذف شود</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

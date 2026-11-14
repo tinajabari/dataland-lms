@@ -1,0 +1,106 @@
+{% extends '_base.html' %}
+
+{% block page_title %}Courses{% endblock page_title %}
+
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>دوره‌های موسسه</h4>
+                {% if is_instructor or is_admin %}
+                    <a href="{% url 'courses:course_create' %}" class="btn btn-gradient btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>ایجاد دوره جدید
+                    </a>
+                {% endif %}
+            </div>
+
+            <form method="get" class="input-group mb-4">
+                {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="جستجوی دوره...">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+
+            <div class="row g-4">
+                {% for course in courses %}
+                    <div class="col-md-6">
+                        <div class="card card-hover h-100 overflow-hidden">
+                            {% if course.cover_image %}
+                                <img src="{{ course.cover_image.url }}" alt="{{ course.title }}"
+                                     class="w-100" style="height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="d-flex align-items-center justify-content-center"
+                                     style="height: 100px; background: var(--dl-gradient); color: #fff;">
+                                    <i class="bi bi-mortarboard-fill fs-3" style="opacity: .85;"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">
+                                        {{ course.get_level_display }}
+                                    </span>
+                                    {% if not course.is_active %}
+                                        <span class="badge bg-secondary rounded-pill">غیرفعال</span>
+                                    {% elif course.is_full %}
+                                        <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill">ظرفیت تکمیل</span>
+                                    {% else %}
+                                        <span class="badge bg-success-subtle text-success-emphasis rounded-pill">
+                                            {{ course.remaining_capacity }} صندلی خالی
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <h5 class="card-title fw-bold">{{ course.title }}</h5>
+                                <p class="text-muted small mb-1">
+                                    <i class="bi bi-person-badge me-1"></i>{{ course.instructor }}
+                                </p>
+                                <p class="card-text text-secondary flex-grow-1">
+                                    {{ course.short_description|default:course.description|truncatewords:20 }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <strong class="text-primary">
+                                        {% if course.price > 0 %}{{ course.price }} تومان{% else %}رایگان{% endif %}
+                                    </strong>
+                                    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-sm btn-primary">
+                                        مشاهده دوره <i class="bi bi-arrow-left ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-light border text-center py-5">
+                            <i class="bi bi-inbox display-6 d-block mb-2 text-muted"></i>
+                            هنوز دوره‌ای ثبت نشده است.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card my-3">
+                <h5 class="card-header bg-white border-0 pt-4 fw-bold">
+                    <i class="bi bi-tags me-1"></i>دسته‌بندی‌ها
+                </h5>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'courses:course_list' %}"
+                           class="list-group-item list-group-item-action {% if not selected_category %}active{% endif %}">
+                            همه دوره‌ها
+                        </a>
+                        {% for cat in categories %}
+                            <a href="?category={{ cat.id }}{% if q %}&q={{ q }}{% endif %}"
+                               class="list-group-item list-group-item-action {% if selected_category == cat.id %}active{% endif %}">
+                                {{ cat.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

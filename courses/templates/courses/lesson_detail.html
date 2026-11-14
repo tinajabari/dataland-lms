@@ -1,0 +1,86 @@
+{% extends '_base.html' %}
+
+{% block page_title %}{{ lesson.title }}{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_list' %}">دوره‌ها</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.slug %}">{{ course.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card my-3 p-4 p-md-5">
+                <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill mb-3" style="width: fit-content;">
+                    درس {{ lesson.order }}
+                </span>
+                <h2 class="fw-bold">{{ lesson.title }}</h2>
+                {% if lesson.description %}
+                    <p class="text-muted fs-5">{{ lesson.description|linebreaksbr }}</p>
+                {% endif %}
+                <hr>
+
+                {% if lesson.content %}
+                    <div style="line-height: 2;">{{ lesson.content|linebreaks }}</div>
+                {% endif %}
+
+                {% if lesson.content_url %}
+                    {% if lesson.is_video_file %}
+                        <video controls class="w-100 rounded-3 mt-3" src="{{ lesson.content_url }}"></video>
+                    {% else %}
+                        <a href="{{ lesson.content_url }}" target="_blank" rel="noopener noreferrer"
+                           class="btn btn-gradient mt-3">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>مشاهده محتوای درس
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                <div class="d-flex justify-content-between mt-5">
+                    {% if prev_lesson %}
+                        <a href="{% url 'courses:lesson_detail' prev_lesson.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-right me-1"></i>درس قبلی
+                        </a>
+                    {% else %}<span></span>{% endif %}
+                    {% if next_lesson %}
+                        <a href="{% url 'courses:lesson_detail' next_lesson.pk %}" class="btn btn-primary">
+                            درس بعدی<i class="bi bi-arrow-left ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if can_manage %}
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{% url 'courses:lesson_update' lesson.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil-square me-1"></i>ویرایش درس
+                        </a>
+                        <a href="{% url 'courses:lesson_delete' lesson.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>حذف درس
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card my-3">
+                <h5 class="card-header bg-white border-0 pt-4 fw-bold">
+                    <i class="bi bi-list-ol me-1"></i>درس‌های این دوره
+                </h5>
+                <div class="list-group list-group-flush">
+                    {% for item in lessons %}
+                        <a href="{% url 'courses:lesson_detail' item.pk %}"
+                           class="list-group-item list-group-item-action {% if item.pk == lesson.pk %}active{% endif %}">
+                            {{ item.order }}. {{ item.title }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

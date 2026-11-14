@@ -1,0 +1,22 @@
+{% extends '_base.html' %}
+
+{% block page_title %}صفحه پیدا نشد{% endblock page_title %}
+{% block hero %}{% endblock hero %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card p-4 p-md-5 text-center">
+                <i class="bi bi-compass text-primary display-3 mb-3"></i>
+                <h3 class="fw-bold">۴۰۴ — صفحه پیدا نشد</h3>
+                <p class="text-muted">آدرسی که دنبالش بودید وجود ندارد یا حذف شده است.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'home' %}" class="btn btn-primary">صفحه اصلی</a>
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-outline-secondary">دوره‌ها</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
